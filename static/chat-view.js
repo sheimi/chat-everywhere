@@ -63,7 +63,6 @@
     function msg_handler(msg, build_msg) {
 
       var chatroom = global.croom(msg.sid)
-      console.log(chatroom)
       $(build_msg(msg)).hide()
                            .appendTo(chatroom.find(".chat-room"))
                            .slideDown()
@@ -86,6 +85,11 @@
         msg_handler(msg, function(msg) {
           var mdiv = '<div>'+msg.user.uname+' Quit</div>'
           return mdiv
+        })
+      } else if (msg.cmd == 'add_user') {
+        global.make_chatroom({
+          sid: msg.session.sid
+          , sname: msg.session.sname || "Untitled"
         })
       }
     }
@@ -238,9 +242,10 @@
           })
           var sname_input = $('<li><input id="sname-new" type="text" placehold="group name"/></li>')
           $(ob).find('ul').append(sname_input)
-          var submit = $('<li><input id="create-session" type="submit"/></li>')
-          submit.appendTo($(ob).find('ul')).click(function(e) {
-            e.preventDefault()
+          var submit = $('<li><input id="create-session" type="submit" value="new group"/><input id="add-user" type="submit" value="add to this group"/></li>')
+          submit.appendTo($(ob).find('ul'))
+
+          function get_selected() {
             var users = []
             var unames = []
             $(lis).each(function() {
@@ -250,14 +255,32 @@
                 unames.push(text)
               }
             })
+            return {
+              users: users
+              , unames: unames
+            }
+          }
+
+          $("#add-user").click(function(e) {
+            e.preventDefault()
+            selected = get_selected()
+            global.chat.add_user({
+              sid: global.active_sid
+              , uids: selected.users
+            })
+          })
+
+          $("#create-session").click(function(e) {
+            e.preventDefault()
             var sname_b = "chat with"
-            for (var i in unames) {
-              sname_b += " " + unames[i]
+            selected = get_selected()
+            for (var i in selected.unames) {
+              sname_b += " " + selected.unames[i]
             }
             var sname = $("#sname-new").val() || sname_b 
-            users.push(global.user.uid)
+            selected.users.push(global.user.uid)
             global.chat.new_session({
-              uids: users
+              uids: selected.users
               , sname: sname
             }).done(function() {
               active_new_session(false)
@@ -372,12 +395,13 @@
         , 'margin-top': '10px'
         , 'font-size': 15
       }).keydown(function(e){
-        console.log(global.active_sid)
         if (e.keyCode != 13)
           return
         chat.new_msg({
           sid: global.active_sid
           , msg: $("#chat-input").val()
+        }).done(function() {
+          $("#chat-input").val("")
         })
       })
 
@@ -422,7 +446,7 @@
         global.chooser_close = true
         var sid = parseInt($(this).attr("data-id"))
         global.chat.rm_user(sid).done(function() {
-          console.log(true)
+          //TODO
         })
         $(this).parent().fadeOut(function() {
           $(this).remove()
@@ -430,7 +454,6 @@
         })
         if (parseInt(sid) == global.active_sid) {
           moveto_chatroom(0)
-          console.log(global.active_sid)
           $.m = global
         }
       })

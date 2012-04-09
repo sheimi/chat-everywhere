@@ -126,6 +126,8 @@ class ChatRoom(object):
         cls = ChatRoom
         session = cls.sessions[sid]
         user = cls.users[uid]
+        if user in session['users']:
+            return False
         user['sessions'].append(session)
         session['users'].append(user)
         msg = {
@@ -133,6 +135,7 @@ class ChatRoom(object):
             'session': self.dump_session(session),
         }
         self.sending(msg, user)
+        return True
 
     def rm_user(self, sid, uid):
         cls = ChatRoom
