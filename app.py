@@ -67,6 +67,7 @@ class ChatRoom(object):
             bc = cls.sessions[0]
             bc['users'].append(user)
             user['sessions'].append(bc)
+            self.user_added([user], bc['sid'])
 
         user['waiters'].append(callback)
 
@@ -131,11 +132,21 @@ class ChatRoom(object):
         user['sessions'].append(session)
         session['users'].append(user)
         msg = {
-            'cmd': 'add_user',
+            'cmd': 'added',
             'session': self.dump_session(session),
         }
         self.sending(msg, user)
         return True
+
+    def user_added(self, users, sid):
+            msg = {
+                'cmd': 'add_user',
+                'sid': sid,
+                'users': self.dump_users(users) 
+            }
+            session = self.sessions[sid]
+            for user in session['users']:
+                self.sending(msg, user)
 
     def rm_user(self, sid, uid):
         cls = ChatRoom
@@ -157,20 +168,20 @@ class ChatRoom(object):
         cls = ChatRoom
         return self.dump_users(cls.users.values())
 
-    def get_session_users(self, sid):
-        cls = ChatRoom
-        users = cls.sessions[sid]['users']
-        return self.dump_users(users)
 
     #some help function
     def get_user(self, uid):
         cls = ChatRoom
         return cls.users[uid]
-    
+
+    def get_session(self, sid):
+        return ChatRoom.sessions[sid]
+
     def get_session_user(self, sid):
         cls = ChatRoom
-        return cls.sessions[sid]
-
+        users = cls.sessions[sid]['users']
+        return self.dump_users(users)
+    
     def dump_user(self, user):
         return {'uid': user['uid'], 'uname': user['uname']}
 
@@ -218,8 +229,15 @@ class AddUserHandler(JSONPHandler, ChatRoom):
         }
         '''
         args = json.loads(self.get_argument("args"))
+        users = []
         for uid in args['uids']:
-            self.add_user(sid=args['sid'], uid=uid)
+            result = self.add_user(sid=args['sid'], uid=uid)
+            if result:
+                users.append(self.get_user(uid))
+
+        if users:
+            self.user_added(users, args['sid'])
+
         self.write(self.jsonp_encode(dict(success=True)))
 
 class NewSessionHandler(JSONPHandler, ChatRoom):
@@ -269,7 +287,7 @@ class SessionUserHandler(JSONPHandler, ChatRoom):
         }
         '''
         args = json.loads(self.get_argument("args"))
-        users = self.get_session_users(args['sid'])
+        users = self.get_session_user(args['sid'])
         self.write(self.jsonp_encode(dict(users=users)))
         
          

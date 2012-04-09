@@ -1,5 +1,8 @@
 !function($) {
 
+$.getScript('http://localhost:8000/static/ui/jquery-ui-1.8.18.custom.js').done(function() {
+$.getScript('http://localhost:8000/static/chat.js').done(function() {
+
   /*
   * options = {
   *   user : {uid, uname}
@@ -9,63 +12,133 @@
 
     var global = {
       user: options.user
-    };
-
-    if (document.styleSheets.length == 0) {
-      $('<style></style>').appendTo('head')
+      , render_to: options.render_to || 'body'
+      , bar_position: options.bar_position || 'fixed'
     }
 
-    document.styleSheets[0].addRule("#chat-bar .divider", "height: 26px; float: left; border-left: 1px solid #d8d8d8; border-right: 1px solid #fdfdfd;")
-    document.styleSheets[0].addRule("hr", "border-left-width: 0; border-right-width: 0;border-top: 1px solid #d8d8d8; border-bottom: 1px solid #fdfdfd;")
-    document.styleSheets[0].addRule("#o-ulist li", "padding: 7px")
-    document.styleSheets[0].addRule(".left", "float: left;")
-    document.styleSheets[0].addRule(".right", "float: right;")
-    document.styleSheets[0].addRule(".inner", "cursor: pointer; padding: 5px; float: left;")
-    document.styleSheets[0].addRule(".clear", "clear: both;")
-    //for chat-room
-    document.styleSheets[0].addRule("#chat-rooms li", "padding: 0")
-    document.styleSheets[0].addRule("#chat-rooms-chooser li", "padding: 5; cursor: pointer;")
-    document.styleSheets[0].addRule("#chat-rooms-chooser li.active", "background-color: whiteSmoke; box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 5px 0px")
-    document.styleSheets[0].addRule("#chat-rooms li .chat-room", "padding: 5px; height: 317px; width: 476px; overflow: scroll")
-    document.styleSheets[0].addRule("#chat-rooms-chooser ul, #chat-rooms ul, ul#o-ulist", "margin: 0; padding: 0; list-style: none;")
-    document.styleSheets[0].addRule("#chat-tool-bar span", "padding: 10px 7px 7px 7px;")
-    document.styleSheets[0].addRule("#chat-tools span", "cursor: pointer;")
-    document.styleSheets[0].addRule("#chat-tools span.active, #chat-block li.o-user.active", "box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 3px 0px inset; background-color: #F5F5F5")
-    document.styleSheets[0].addRule("#chat-block li.o-user", "cursor: pointer;")
+    if ($.chat_obj == undefined) {
+      //chat operation
+      var chat = new $.chat(options)
+      $.chat_obj = chat
+    }
+    global.chat = $.chat_obj
 
-    var chat_bar = $('<div id="chat-bar"><div style="min-width: 1000px; padding: 0 50px"><div class="divider"></div>'
+    if (document.styleSheets.length == 0) {
+      $('<style tyle="text/css"></style>').appendTo('head')
+    }
+
+    function addcss(s, r) {
+      var len = document.styleSheets.length
+      var sheet = document.styleSheets[len-1]
+      if (sheet.addRule) {
+        sheet.addRule(s, r)
+      } else if (sheet.insertRule){
+        var rule = s + '{' + r + '}'
+        sheet.insertRule(rule, 0)
+      }
+    }
+
+    function addcss_transition(s, r) {
+      addcss(s, "-webkit-transition:"+r)
+      addcss(s, "-moz-transition:"+r)
+      addcss(s, "-ms-transition:"+r)
+      addcss(s, "-o-transition:"+r)
+      addcss(s, "transition:"+r)
+    }
+
+    addcss("#chat-bar .divider", "height: 26px; float: left; border-left: 1px solid #d8d8d8; border-right: 1px solid #fdfdfd;")
+    addcss("hr", "border-left-width: 0; border-right-width: 0;border-top: 1px solid #d8d8d8; border-bottom: 1px solid #fdfdfd;")
+    addcss("#o-ulist li", "padding: 7px")
+    addcss(".left", "float: left;")
+    addcss(".right", "float: right;")
+    addcss(".inner", "cursor: pointer; padding: 5px; float: left;")
+    addcss(".clear", "clear: both;")
+    //for chat-room
+    addcss("#chat-rooms li", "padding: 0")
+    addcss("#chat-rooms-chooser li", "padding: 5px; cursor: pointer; text-overflow: ellipsis;")
+    addcss("#chat-rooms-chooser li.active", "background-color: whiteSmoke; box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 5px 0px")
+    addcss("#chat-rooms li .chat-room", "padding: 0; height: 327px; width: 486px; overflow-y: auto;overflow-x: hidden;")
+    addcss("#chat-rooms-chooser ul, #chat-rooms ul, ul#o-ulist", "margin: 0; padding: 0; list-style: none;")
+    addcss("#chat-tool-bar span", "padding: 10px 7px 7px 7px;")
+    addcss("#chat-tools span", "cursor: pointer;")
+    addcss("#chat-tools span.active, #chat-block li.o-user.active", "box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 3px 0px inset; background-color: #F5F5F5")
+    addcss("#chat-block li.o-user", "cursor: pointer;")
+    //chat msg
+    addcss("div.chat-room div.msg, div.chat-room div.info, div.chat-room div.chat-hint", "box-shadow: 0 2px 5px rgba(200, 200, 200, 0.5)")
+    addcss("div.chat-room div.chat-hint", "padding: 10px; color: #C09853; background-color: #FCF8E3; border-bottom: 1px solid #FBEED5;")
+    addcss("div.chat-room div.msg", "padding: 10px;color: #555; background-color: #F8F8F8; border-bottom: 1px solid #D2D2D2;")
+    addcss("div.chat-room div.info", "padding: 10px;color: #3A87AD; background-color: #D9EDF7; border-bottom: 1px solid #BCE8F1;")
+    //for tools
+    addcss('input:focus', 'box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);outline: 0;border: 1px solid deepSkyBlue;') 
+    addcss('input:hover', 'border: 1px solid deepSkyBlue;')
+    addcss("#chat-new-submit input", "width: 138px; padding: 3px !important; padding-left: 3px; pading-right: 3px;")
+    addcss('input', 'box-sizing: content-box; border: solid #D2D2D2 1px;')
+    addcss_transition('input', 'border linear 0.2s, box-shadow linear 0.2s;')
+    addcss('input[type="text"]', 'box_shadow: rgba(0, 0, 0, 0.1) 0px 0px 7px 0px inset;') 
+    addcss('input[type="submit"]', 'background: #F0F0F0; cursor: pointer')
+
+
+    var chat_bar = $('<div id="chat-bar"><div style="padding: 0 50px"><div class="divider"></div>'
                      + '<div id="user-block" class="inner"><a>' + options.user.uname + '</a></div><div class="divider"></div>' 
                      + '<div id="other-users" class="inner" style="cursor: pointer">Online Users</div><div class="divider"></div>' 
                      + '<div id="chat-min" class="inner">Chat Block</div>'
                      + '<div class="clear"></div></div></div>')
 
+    console.log($(global.render_to).height())
     chat_bar.css({
-      'z-index': 2000
+      'z-index': 20000
       , 'opacity': 0.7
-      , 'position': 'fixed'
+      , 'position': global.bar_position
       , 'border-top': 'solid #D2D2D2 1px'
       , 'box-shadow': 'rgba(0, 0, 0, 0.5) 0px 0px 5px 0px'
       , 'background-color': 'whiteSmoke'
-      , 'bottom': 0
-      , 'left': 0
-      , 'right': 0
       , 'color': 'black'
       , 'font-size': 15
     })
 
-    $(chat_bar).appendTo('body')
+    if (global.bar_position == 'fixed') {
+      chat_bar.css({
+        'bottom' : 0
+        , 'left': 0
+        , 'right': 0
+      })
+    } else {
+      chat_bar.css({
+        'margin-top': $(global.render_to).height() - 28
+        , 'margin-left': 0
+        , 'width': $(global.render_to).width()
+        , 'float': 'left'
+      })
+
+      $(window).resize(function() {
+        $(chat_bar).css({
+        'margin-top': $(global.render_to).height() - 28
+        , 'margin-left': 0
+        , 'width': $(global.render_to).width()
+        })
+      })
+
+    }
+
+    $(chat_bar).appendTo(global.render_to)
     $("#chat-bar").hover(function() {
       $(this).animate({opacity: 1})
     }, function() {
       $(this).animate({opacity: 0.7})
     })
 
+
     function msg_handler(msg, build_msg) {
 
       var chatroom = global.croom(msg.sid)
-      $(build_msg(msg)).hide()
-                           .appendTo(chatroom.find(".chat-room"))
-                           .slideDown()
+      var final_msg = '<div>' + build_msg(msg) + '</div>'
+      $(final_msg).hide()
+            .appendTo(chatroom.find(".chat-content"))
+            .slideDown(function() {
+              var height = $(chatroom).find('.chat-content').height() - $(chatroom).find(".chat-room").height()
+              console.log(height)
+              $(chatroom).find(".chat-room").animate({scrollTop: height});
+            })
     }
 
     options.on_msg = function(msg) {
@@ -73,7 +146,7 @@
       console.log(msg)
       if (msg.cmd == 'new_msg') {
         msg_handler(msg, function(msg) {
-          var mdiv = '<div>'+msg.user.uname+' : '+msg.msg+'</div>'
+          var mdiv = '<div class="msg">' + msg.user.uname+' : '+msg.msg + '</div>'
           return mdiv
         })
       } else if (msg.cmd == 'new_session') {
@@ -83,20 +156,29 @@
         })
       } else if (msg.cmd == 'rm_user') {
         msg_handler(msg, function(msg) {
-          var mdiv = '<div>'+msg.user.uname+' Quit</div>'
+          var mdiv = '<div class="info">'+msg.user.uname+' Quit</div>'
           return mdiv
         })
-      } else if (msg.cmd == 'add_user') {
+      } else if (msg.cmd == 'added') {
         global.make_chatroom({
           sid: msg.session.sid
           , sname: msg.session.sname || "Untitled"
         })
+      } else if (msg.cmd == 'add_user') {
+        msg_handler(msg, function(msg) {
+          var mdiv = '<div class="info">User '
+          for (var ui in msg.users) {
+            var user = msg.users[ui]
+            if (user.uname == undefined)
+              return
+            mdiv += user.uname + ', '
+          }
+          mdiv += "Added To This Group</div>"
+          return mdiv
+        })
       }
     }
 
-    //chat operation
-    var chat = new $.chat(options)
-    global.chat = chat
 
     //chat more
     /*
@@ -105,16 +187,16 @@
     !function($) {
 
       function online_block(options) {
-        options.append_to = options.append_to || 'body'
+        options.append_to = options.append_to || global.render_to 
         var ob = $('<div id="online-block"></div>')
         ob.css({
-          'z-index': 1990 
+          'z-index': 19900
           , 'position': 'absolute'
           , 'border': 'solid #D2D2D2 1px'
           , 'box-shadow': 'rgba(0, 0, 0, 0.1) 0px 0px 5px 0px'
           , 'background-color': 'whiteSmoke'
           , 'color': 'black'
-          , 'overflow': 'scroll'
+          , 'overflow-y': 'auto'
         })
         if (options.css != undefined)
         ob.css(options.css)
@@ -133,14 +215,14 @@
             ob.css(op.css)
           }
           options.online_func(op.sid).done(function(msg) {
-            users = msg.users
+            var users = msg.users
             if (users.length <= 1) {
               is_click = !is_click
               return
             }
             var lis = '<ul id="o-ulist">';
             for (var ui in users) {
-              if (users[ui].uid != global.user.uid)
+              if (users[ui].uid != global.user.uid && users[ui].uname != undefined)
                 lis += build_userli(users[ui])
             }
             lis += '</ul>'
@@ -155,20 +237,24 @@
 
       var is_click = false
       var ob = new online_block({
-        online_func: chat.get_online
+        online_func: global.chat.get_online
         , css: {
           'border-bottom-width': 0 
           , 'width': $("#chat-bar #other-users").width() + 10
           , 'font-size': 15
           , 'max-height': 200
-          , 'top': $("#chat-bar").position().top - $("#chat-bar").height() 
-          , 'left': $("#chat-bar #other-users").position().left - 1
+          , 'position': 'fixed'
         }
       })
       $("#other-users").click(function() {
         is_click = !is_click
         if (is_click) {
-          ob.show()
+          ob.show({
+            css: {
+              'top': $("#chat-bar").position().top - $("#chat-bar").height() 
+              , 'left': $("#chat-bar #other-users").position().left - 1
+            }
+          })
         } else {
           ob.hide()
         }
@@ -187,24 +273,26 @@
       var chat_block = $('<div id="chat-block">'
                          + '<div class="close" style="position: absolute; font-size: 15px; right: 5px; top: 0; color: #ccc; cursor: pointer;">&times;</div>'
                          + '<div id="chat-tool-bar">'
-                         +   '<span id="chat-session-name">Broad Cast</span>'
+                         +   '<span id="chat-session-name">Broadcast</span>'
                          +   '<div id="chat-tools" class="right" style="margin-right: 10px">'
                          +     '<span id="session-users">Group Users</span>'
                          +     '<span id="new-session">New</span>'
                          +   '</div><div class="clear"></div>'
                          + '</div><hr/>'
                          + '<div id="chat-rooms-chooser" class="left">'
-                         +   '<ul><li data-id="0" data-name="Broad Cast" class="active chooser" id="chat-room-chooser-0">Broad Cast</li></ul>'
+                         +   '<ul><li data-id="0" data-name="Broadcast" class="active chooser" id="chat-room-chooser-0">Broadcast</li></ul>'
                          + '</div>'
                          + '<div id="chat-rooms" class="left">'
-                         +   '<ul><li data-id="0" data-name="Broad Cast" id="chat-room-0"><div class="chat-room">Broad Cast</div></li></ul>'
+                         +   '<ul style="padding: 0"><li data-id="0" data-name="Broadcast" id="chat-room-0"><div class="chat-room">'
+                         +   '<div class="chat-content"><div class="chat-hint">Your Messages From Broadcast</div></div></div></li></ul>'
                          + '</div>'
-                         + '<input id="chat-input" class="left" type="text"/>'
+                         + '<input placeholder="Your Message ..." id="chat-input" class="left" type="text" x-webkit-speech="" x-webkit-grammar="builtin:search" lang="en"/>'
                          + '<div class="clear"></div></div>')
       var chat_block_min = $('<span id="chat-block-min">Chat Block</span>')
 
       chat_block.css({
         'position': 'absolute'
+        , 'float': 'left'
         , 'border': 'solid #D2D2D2 1px'
         , 'box-shadow': 'rgba(0, 0, 0, 0.1) 0px 0px 7px 0px'
         , 'background-color': 'whiteSmoke'
@@ -213,7 +301,7 @@
         , 'height': 400
         , 'padding': 10
         , 'font-size': 15
-      }).hide().appendTo('body').draggable()
+      }).hide().appendTo(global.render_to).draggable()
 
 
       //tools
@@ -222,7 +310,7 @@
         online_func: global.chat.get_online
         , append_to: '#chat-block'
         , css: {
-          'width': 140 
+          'width': 160 
           , 'max-height': 200
         }
         , callback: function(ob) {
@@ -240,11 +328,10 @@
               $(this).removeClass('active')
             }
           })
-          var sname_input = $('<li><input id="sname-new" type="text" placehold="group name"/></li>')
-          $(ob).find('ul').append(sname_input)
-          var submit = $('<li><input id="create-session" type="submit" value="new group"/><input id="add-user" type="submit" value="add to this group"/></li>')
-          submit.appendTo($(ob).find('ul'))
-
+          var submit = $('<li id="chat-new-submit"><div><input id="sname-new" type="text" placeholder="group name"/></div>'
+                        + '<div style="margin: 5px 0"><input id="create-session" type="submit" value="new group"/></div>'
+                        +'<div><input id="add-user" type="submit" value="add to this group"/></div></li>')
+          $(ob).find('ul').append(submit)
           function get_selected() {
             var users = []
             var unames = []
@@ -255,6 +342,7 @@
                 unames.push(text)
               }
             })
+            console.log(unames)
             return {
               users: users
               , unames: unames
@@ -264,9 +352,14 @@
           $("#add-user").click(function(e) {
             e.preventDefault()
             selected = get_selected()
+            console.log(selected.users)
+            if (selected.users.length == 0)
+              return
             global.chat.add_user({
               sid: global.active_sid
               , uids: selected.users
+            }).done(function() {
+              active_new_session(false)
             })
           })
 
@@ -274,8 +367,11 @@
             e.preventDefault()
             var sname_b = "chat with"
             selected = get_selected()
+            if (selected.users.length == 0)
+              return
             for (var i in selected.unames) {
-              sname_b += " " + selected.unames[i]
+              if (typeof selected.unames[i] === "string")
+                sname_b += " " + selected.unames[i]
             }
             var sname = $("#sname-new").val() || sname_b 
             selected.users.push(global.user.uid)
@@ -373,10 +469,10 @@
         , 'width': css_p.widths[0]
         , 'border': css_p.border
         , 'box-shadow': css_p.box_shadow
-        , 'background-color': 'white'
         , 'margin-right': '10px'
-        , 'overflow': 'scroll'
-        , 'background-color': '#EEEEE'
+        , 'overflow-y': 'auto'
+        , 'background-color': '#EEEEEE'
+        , 'font-size': 13
       })
       $("#chat-rooms").css({
         'height': css_p.main_height - css_p.chat_input_h - 10
@@ -387,17 +483,15 @@
         , 'overflow': 'hidden'
       })
       $("#chat-input").css({
-        'height': css_p.chat_input_h 
-        , 'width': css_p.widths[1]
-        , 'border': css_p.border
-        , 'box-shadow': css_p.box_shadow
-        , 'padding': css_p.padding
+        'height': css_p.chat_input_h - 10
+        , 'width': css_p.widths[1] - 10 
+        , 'padding': 4 
         , 'margin-top': '10px'
         , 'font-size': 15
       }).keydown(function(e){
         if (e.keyCode != 13)
           return
-        chat.new_msg({
+        global.chat.new_msg({
           sid: global.active_sid
           , msg: $("#chat-input").val()
         }).done(function() {
@@ -406,21 +500,24 @@
       })
 
       function init_position() {
-        var wh = $(window).height()
-        var ww = $(window).width()
+        var wh = $(global.render_to).height() - 28
+        var ww = $(global.render_to).width()
         var cbh = $("#chat-block").height()
         var cbw = $("#chat-block").width()
         $("#chat-block").css({
-          'left': (ww - cbw) / 2
-          , 'top': (wh - cbh) / 2 
+          'margin-left': (ww - cbw) / 2
+          , 'margin-top': (wh - cbh) / 2 
         })
+        console.log(wh)
+        console.log(cbh)
+        console.log((wh - cbh) / 2)
       }
       function show_chat_block(show) {
         if (show) {
           init_position()
-          $("#chat-block").fadeIn()
+          $("#chat-block").fadeIn(200)
         } else {
-          $("#chat-block").fadeOut()
+          $("#chat-block").fadeOut(200)
         }
         is_show = show 
       }
@@ -470,9 +567,10 @@
         if (options.sname == undefined)
           options.sname = "Untitled"
         var chatroom = '<li id="chat-room-'+options.sid+'" data-name="'+options.sname+'"data-id="'+options.sid+'">'
-                       + '<div class="chat-room">'+options.sid+'</div></li>'
+                       + '<div class="chat-room"><div class="chat-hint">Your Messages from '+options.sname+'</div></div></li>'
         var chatroomchooser = '<li class="chooser" id="chat-room-chooser-'+options.sid+'" data-name="'+options.sname+'"data-id="'+options.sid+'">'
-                      + options.sname + '<span class="close right" data-id="'+options.sid+'" style="margin-right: 5px;color: #ccc;">&times;</span></li>'
+        + '<span class="name left" style="width: 75px; text-overflow:ellipsis; overflow: hidden;">' + options.sname + '</span>'
+                + '<span class="close right" data-id="'+options.sid+'" style="margin-right: 5px;color: #ccc;">&times;</span><div class="clear"></div></li>'
         $(chatroom).appendTo("#chat-rooms ul")
         $(chatroomchooser).appendTo("#chat-rooms-chooser ul")
       }
@@ -511,4 +609,7 @@
 
   }
   $.chat_view = chat_view
+
+})})
+
 }(jQuery)
