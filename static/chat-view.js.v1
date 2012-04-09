@@ -163,7 +163,7 @@ $.getScript('http://localhost:8000/static/chat.js').done(function() {
           for (var ui in msg.users) {
             var user = msg.users[ui]
             if (user.uname == undefined)
-              return
+              continue
             mdiv += user.uname + ', '
           }
           mdiv += "Added To This Group</div>"

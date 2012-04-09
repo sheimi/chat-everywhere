@@ -65,7 +65,7 @@ function chat_view(options) {
           for (var ui in msg.users) {
             var user = msg.users[ui]
             if (user.uname == undefined)
-              return
+              continue
             mdiv += user.uname + ', '
           }
           mdiv += "Added To This Group</div>"
