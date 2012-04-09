@@ -333,8 +333,6 @@
         }
       })
 
-
-
       var css_p = {
         main_height : 365
         , widths: [100, 486]
@@ -374,53 +372,7 @@
         , 'margin-top': '10px'
         , 'font-size': 15
       }).keydown(function(e){
-        if (e.keyCode != 13)
-          return
-        chat.new_msg({
-          sid: global.active_sid
-          , msg: $("#chat-input").val()
-        })
-      })
-
-      var css_p = {
-        main_height : 365
-        , widths: [100, 486]
-        , chat_input_h: 30
-        , box_shadow: 'rgba(0, 0, 0, 0.1) 0px 0px 7px 0px inset'
-        , border: 'solid #D2D2D2 1px'
-      }
-      $("#chat-block .divider").css({
-        'height': css_p.main_height
-        , 'margin': '0 5px'
-        , 'float': 'left'
-      })
-      $("#chat-rooms-chooser").css({
-        'height': css_p.main_height 
-        , 'width': css_p.widths[0]
-        , 'border': css_p.border
-        , 'box-shadow': css_p.box_shadow
-        , 'background-color': 'white'
-        , 'margin-right': '10px'
-        , 'overflow': 'scroll'
-        , 'background-color': '#EEEEE'
-      })
-      $("#chat-rooms").css({
-        'height': css_p.main_height - css_p.chat_input_h - 10
-        , 'width': css_p.widths[1]
-        , 'border': css_p.border
-        , 'box-shadow': css_p.box_shadow
-        , 'background-color': 'white'
-        , 'overflow': 'hidden'
-      })
-      $("#chat-input").css({
-        'height': css_p.chat_input_h 
-        , 'width': css_p.widths[1]
-        , 'border': css_p.border
-        , 'box-shadow': css_p.box_shadow
-        , 'padding': css_p.padding
-        , 'margin-top': '10px'
-        , 'font-size': 15
-      }).keydown(function(e){
+        console.log(global.active_sid)
         if (e.keyCode != 13)
           return
         chat.new_msg({
@@ -457,21 +409,17 @@
         show_chat_block(false)
       })
 
+      global.chooser_close = false
       $(".chooser").live("click", function() {
         var sid = parseInt($(this).attr("data-id"))
-        if (sid != global.active_sid) {
+        if (sid != global.active_sid && !global.chooser_close) {
           moveto_chatroom(sid)
-          global.active_sid = sid
         }
+        global.chooser_close = false 
       })
 
-      /*
-      * options = {
-      *   sid: chatroom id
-      *   sname: chatroom name optional
-      * }
-      */
       $(".chooser span.close").live('click', function() {
+        global.chooser_close = true
         var sid = parseInt($(this).attr("data-id"))
         global.chat.rm_user(sid).done(function() {
           console.log(true)
@@ -482,8 +430,16 @@
         })
         if (parseInt(sid) == global.active_sid) {
           moveto_chatroom(0)
+          console.log(global.active_sid)
+          $.m = global
         }
       })
+      /*
+      * options = {
+      *   sid: chatroom id
+      *   sname: chatroom name optional
+      * }
+      */
       function make_chatroom(options) {
         if (global.sids.indexOf(options.sid) != -1)
           return
@@ -514,6 +470,7 @@
           $(this).text(sname)
           $(this).fadeIn()
         })
+        global.active_sid = sid
       }
       function croom(sid) {
         return $("#chat-room-"+sid)
@@ -521,11 +478,11 @@
       function croomc(sid) {
         return $("#chat-room-chooser-"+sid)
       }
+
       global.croom = croom
       global.make_chatroom = make_chatroom
       global.moveto_chatroom = moveto_chatroom
       $.global = global
-
       $.chat_block = chat_block
     }(jQuery)
 

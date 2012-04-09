@@ -140,7 +140,7 @@ class ChatRoom(object):
         user = cls.users[uid]
         user['sessions'].remove(session)
         session['users'].remove(user)
-        if not session['users']:
+        if not session['users'] and sid != 0:
             cls.sessions.pop(sid)
         else:
             msg = {
