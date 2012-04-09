@@ -303,7 +303,7 @@ function chat_view(options) {
                        +     '<span id="session-users">Group Users</span>'
                        +     '<span id="new-session">New</span>'
                        +   '</div><div class="clear"></div>'
-                       + '</div><hr/>'
+                       + '</div><hr style="margin: 7px 0; border-left-width: 0; border-right-width: 0;border-top: 1px solid #d8d8d8; border-bottom: 1px solid #fdfdfd;"/>'
                        + '<div id="chat-rooms-chooser" class="left">'
                        +   '<ul><li data-id="0" data-name="Broadcast" class="active chooser" id="chat-room-chooser-0">Broadcast</li></ul>'
                        + '</div>'
@@ -469,6 +469,8 @@ function chat_view(options) {
             , 'margin-top': (wh - cbh) / 2 
           })
         } else {
+          var wh = $(window).height() - 28
+          var ww = $(window).width()
           $("#chat-block").css({
             'left': (ww - cbw) / 2
             , 'top': (wh - cbh) / 2 
