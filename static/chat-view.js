@@ -463,10 +463,17 @@ function chat_view(options) {
         var ww = $(global.render_to).width()
         var cbh = $("#chat-block").height()
         var cbw = $("#chat-block").width()
-        $("#chat-block").css({
-          'margin-left': (ww - cbw) / 2
-          , 'margin-top': (wh - cbh) / 2 
-        })
+        if (global.bar_position != 'fixed') {
+          $("#chat-block").css({
+            'margin-left': (ww - cbw) / 2
+            , 'margin-top': (wh - cbh) / 2 
+          })
+        } else {
+          $("#chat-block").css({
+            'left': (ww - cbw) / 2
+            , 'top': (wh - cbh) / 2 
+          })
+        }
 
         $("#chat-block").fadeIn(200)
       } else {
