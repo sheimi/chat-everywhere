@@ -1,0 +1,196 @@
+@import "lib/bootstrap.less";
+.left { float: left;}
+.right { float: right;}
+.clear { clear: both;}
+
+#chat-rooms-chooser ul, #chat-rooms ul, ul#o-ulist{
+  margin: 0; 
+  padding: 0; 
+  list-style: none;
+}
+
+#chat-bar {
+
+  z-index: 20000;
+  border-top: solid #D2D2D2 1px;
+  background-color: whiteSmoke;
+  color: black;
+  font-size: 15px;
+  opacity: 0.7;
+  @box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 5px 0px;
+  .box-shadow(@box-shadow);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  #chat-bar-inner {
+    padding: 0 50px;
+  }
+  #other-users {
+    cursor: pointer;
+  }
+  .divider {
+    height: 26px; 
+    float: left; 
+    border-left: 1px solid #d8d8d8; 
+    border-right: 1px solid #fdfdfd;
+  }
+  .inner {
+    cursor: pointer;
+    padding: 5px;
+    float: left;
+  }
+}
+
+#chat-block {
+
+  color: black;
+  width: 600px;
+  height: 400px;
+  padding: 10px;
+  font-size: 15px;
+  position: absolute;
+  float: left;
+  border: solid #D2D2D2 1px;
+  background-color: whiteSmoke;
+
+  @box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 3px 2px;
+  .box-shadow(@box-shadow);
+
+  #chat-tools {
+    margin-right: 10px;
+  }
+  hr {
+    margin: 7px 0; 
+  }
+
+  @main_height: 365px;
+  @chat_input_h: 30px;
+  @width1: 100px;
+  @width2: 486px;
+  .divider {
+    height: @main_height;
+    margin: 0 5px;
+    float: left;
+  }
+  #chat-rooms-chooser {
+    height: @main_height;
+    width: @width1;
+    margin-right: 10px;
+    overflow-y: auto;
+    background-color: #EEEEEE;
+    font-size: 13px;
+    border: solid #D2D2D2 1px;
+
+    @box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 7px 0px inset;
+    .box-shadow(@box-shadow);
+
+    .chooser {
+      .name {
+        width: 75px;
+        text-overflow:ellipsis; 
+        overflow: hidden;
+      }
+    }
+    li {
+      padding: 5px; 
+      cursor: pointer; 
+      text-overflow: ellipsis;
+
+      &.active {
+        background-color: whiteSmoke; 
+        @box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 5px 0px;
+        .box-shadow(@box-shadow);
+      }
+    }
+  }
+  #chat-rooms {
+    height: @main_height - @chat_input_h - 10px;
+    width: @width2;
+    background-color: white;
+    overflow: hidden;
+    @box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 7px 0px inset;
+    .box-shadow(@box-shadow);
+    border: solid #D2D2D2 1px;
+    padding: 0;
+    li .chat-room {
+      padding: 0; 
+      height: 327px; 
+      width: 486px; 
+      overflow-y: auto;
+      overflow-x: hidden;
+
+      div.msg, div.info, div.chat-hint {
+        @box-shadow: 0 2px 5px rgba(200, 200, 200, 0.5);
+        .box-shadow(@box-shadow);
+      }
+      div.chat-hint {
+        padding: 10px;
+        color: #C09853;
+        background-color: #FCF8E3;
+        border-bottom: 1px solid #FBEED5;
+      }
+      div.msg {
+        padding: 10px;
+        color: #555; 
+        background-color: #F8F8F8; 
+        border-bottom: 1px solid #D2D2D2;
+      }
+      div.info {
+        padding: 10px;
+        color: #3A87AD;
+        background-color: #D9EDF7; 
+        border-bottom: 1px solid #BCE8F1;
+      }
+
+    }
+  }
+  #chat-input {
+    height: @chat_input_h - 10px;
+    width: @width2 - 10px; 
+    padding: 4px;
+    margin-top: 10px;
+    font-size: 15px;
+  }
+  #chat-tool-bar {
+    span {
+      padding: 10px 7px 7px 7px;
+    }
+    #chat-tools span {
+      cursor: pointer;
+      &.active {
+        @box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 3px 0px inset; 
+        .box-shadow(@box-shadow);
+        background-color: #F5F5F5;
+      }
+    }
+  }
+}
+#o-ulist li {
+  padding: 7px;
+}
+
+li.o-user {
+  cursor: pointer;
+  &.active {
+    @box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 3px 0px inset; 
+    .box-shadow(@box-shadow);
+    background-color: #F5F5F5;
+  }
+}
+
+
+/* --- new --- */
+
+#online-block {
+  z-index: 19900;
+  position: absolute;
+  border: solid #D2D2D2 1px;
+  @box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px;
+  .box-shadow(@box-shadow);
+  background-color: whiteSmoke;
+  color: black;
+  overflow-y: auto;
+}
+

@@ -9,9 +9,6 @@ if (Array.prototype.remove == undefined) {
   }
 }
 
-$.getScript('http://localhost:8000/static/ui/jquery-ui-1.8.18.custom.js')
-$.getScript('http://localhost:8000/static/chat.js')
-
 function chat_view(options) {
   //setup globals
   var global = {
@@ -76,107 +73,17 @@ function chat_view(options) {
     global.chat = new $.chat(options)
   }(jQuery, global)
 
-  //add_css
-  !function($) {
-    if (document.styleSheets.length == 0) {
-      $('<style tyle="text/css"></style>').appendTo('head')
-    }
-
-    function addcss(s, r) {
-      var len = document.styleSheets.length
-      var sheet = document.styleSheets[len-1]
-      if (sheet.addRule) {
-        sheet.addRule(s, r)
-      } else if (sheet.insertRule){
-        var rule = s + '{' + r + '}'
-        sheet.insertRule(rule, 0)
-      }
-    }
-
-    function addcss_transition(s, r) {
-      addcss(s, "-webkit-transition:"+r)
-      addcss(s, "-moz-transition:"+r)
-      addcss(s, "-ms-transition:"+r)
-      addcss(s, "-o-transition:"+r)
-      addcss(s, "transition:"+r)
-    }
-
-    addcss("#chat-bar .divider", "height: 26px; float: left; border-left: 1px solid #d8d8d8; border-right: 1px solid #fdfdfd;")
-    addcss("hr", "border-left-width: 0; border-right-width: 0;border-top: 1px solid #d8d8d8; border-bottom: 1px solid #fdfdfd;")
-    addcss("#o-ulist li", "padding: 7px")
-    addcss(".left", "float: left;")
-    addcss(".right", "float: right;")
-    addcss(".inner", "cursor: pointer; padding: 5px; float: left;")
-    addcss(".clear", "clear: both;")
-    //for chat-room
-    addcss("#chat-rooms li", "padding: 0")
-    addcss("#chat-rooms-chooser li", "padding: 5px; cursor: pointer; text-overflow: ellipsis;")
-    addcss("#chat-rooms-chooser li.active", "background-color: whiteSmoke; box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 5px 0px")
-    addcss("#chat-rooms li .chat-room", "padding: 0; height: 327px; width: 486px; overflow-y: auto;overflow-x: hidden;")
-    addcss("#chat-rooms-chooser ul, #chat-rooms ul, ul#o-ulist", "margin: 0; padding: 0; list-style: none;")
-    addcss("#chat-tool-bar span", "padding: 10px 7px 7px 7px;")
-    addcss("#chat-tools span", "cursor: pointer;")
-    addcss("#chat-tools span.active, #chat-block li.o-user.active", "box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 3px 0px inset; background-color: #F5F5F5")
-    addcss("#chat-block li.o-user", "cursor: pointer;")
-    //chat msg
-    addcss("div.chat-room div.msg, div.chat-room div.info, div.chat-room div.chat-hint", "box-shadow: 0 2px 5px rgba(200, 200, 200, 0.5)")
-    addcss("div.chat-room div.chat-hint", "padding: 10px; color: #C09853; background-color: #FCF8E3; border-bottom: 1px solid #FBEED5;")
-    addcss("div.chat-room div.msg", "padding: 10px;color: #555; background-color: #F8F8F8; border-bottom: 1px solid #D2D2D2;")
-    addcss("div.chat-room div.info", "padding: 10px;color: #3A87AD; background-color: #D9EDF7; border-bottom: 1px solid #BCE8F1;")
-    //for tools
-    addcss('input:focus', 'box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);outline: 0;border: 1px solid deepSkyBlue;') 
-    addcss('input:hover', 'border: 1px solid deepSkyBlue;')
-    addcss("#chat-new-submit input", "width: 138px; padding: 3px !important; padding-left: 3px; pading-right: 3px;")
-    addcss('input', 'box-sizing: content-box; border: solid #D2D2D2 1px;')
-    addcss_transition('input', 'border linear 0.2s, box-shadow linear 0.2s;')
-    addcss('input[type="text"]', 'box_shadow: rgba(0, 0, 0, 0.1) 0px 0px 7px 0px inset;') 
-    addcss('input[type="submit"]', 'background: #F0F0F0; cursor: pointer')
-  }(jQuery)
-    //css end
-
-
   //set chatbar
   !function($, global) {
 
-    var chat_bar = $('<div id="chat-bar"><div style="padding: 0 50px"><div class="divider"></div>'
+    var chat_bar = $('<div id="chat-bar">'
+                     + ' <div id="chat-bar-inner">'
+                     + '<div class="divider"></div>'
                      + '<div id="user-block" class="inner"><a>' + options.user.uname + '</a></div><div class="divider"></div>' 
-                     + '<div id="other-users" class="inner" style="cursor: pointer">Online Users</div><div class="divider"></div>' 
+                     + '<div id="other-users" class="inner" >Online Users</div><div class="divider"></div>' 
                      + '<div id="chat-min" class="inner">Chat Block</div>'
                      + '<div class="clear"></div></div></div>')
 
-    chat_bar.css({
-      'z-index': 20000
-      , 'opacity': 0.7
-      , 'position': global.bar_position
-      , 'border-top': 'solid #D2D2D2 1px'
-      , 'box-shadow': 'rgba(0, 0, 0, 0.5) 0px 0px 5px 0px'
-      , 'background-color': 'whiteSmoke'
-      , 'color': 'black'
-      , 'font-size': 15
-    })
-
-    if (global.bar_position == 'fixed') {
-      chat_bar.css({
-        'bottom' : 0
-        , 'left': 0
-        , 'right': 0
-      })
-    } else {
-      chat_bar.css({
-        'margin-top': $(global.render_to).height() - 28
-        , 'margin-left': 0
-        , 'width': $(global.render_to).width()
-        , 'float': 'left'
-      })
-
-      $(window).resize(function() {
-        $(chat_bar).css({
-        'margin-top': $(global.render_to).height() - 28
-        , 'margin-left': 0
-        , 'width': $(global.render_to).width()
-        })
-      })
-    }
 
     global.chat_bar = {
       append: function() {
@@ -233,17 +140,9 @@ function chat_view(options) {
     function online_block(options) {
       options.append_to = options.append_to || global.render_to 
       var ob = $('<div id="online-block"></div>')
-      ob.css({
-        'z-index': 19900
-        , 'position': 'absolute'
-        , 'border': 'solid #D2D2D2 1px'
-        , 'box-shadow': 'rgba(0, 0, 0, 0.1) 0px 0px 5px 0px'
-        , 'background-color': 'whiteSmoke'
-        , 'color': 'black'
-        , 'overflow-y': 'auto'
-      })
+
       if (options.css != undefined)
-      ob.css(options.css)
+        ob.css(options.css)
       function build_userli(user) {
         var li = '<li class="o-user" data-id="' + user.uid + '">'+user.uname+'</li>'
         return li
@@ -296,75 +195,25 @@ function chat_view(options) {
     }
 
     var chat_block = $('<div id="chat-block">'
-                       + '<div class="close" style="position: absolute; font-size: 15px; right: 5px; top: 0; color: #ccc; cursor: pointer;">&times;</div>'
+                       + '<div class="close">&times;</div>'
                        + '<div id="chat-tool-bar">'
                        +   '<span id="chat-session-name">Broadcast</span>'
-                       +   '<div id="chat-tools" class="right" style="margin-right: 10px">'
+                       +   '<div id="chat-tools" class="right">'
                        +     '<span id="session-users">Group Users</span>'
                        +     '<span id="new-session">New</span>'
                        +   '</div><div class="clear"></div>'
-                       + '</div><hr style="margin: 7px 0; border-left-width: 0; border-right-width: 0;border-top: 1px solid #d8d8d8; border-bottom: 1px solid #fdfdfd;"/>'
+                       + '</div>'
+                       + '<hr>' 
                        + '<div id="chat-rooms-chooser" class="left">'
                        +   '<ul><li data-id="0" data-name="Broadcast" class="active chooser" id="chat-room-chooser-0">Broadcast</li></ul>'
                        + '</div>'
                        + '<div id="chat-rooms" class="left">'
-                       +   '<ul style="padding: 0"><li data-id="0" data-name="Broadcast" id="chat-room-0"><div class="chat-room">'
+                       +   '<ul><li data-id="0" data-name="Broadcast" id="chat-room-0"><div class="chat-room">'
                        +   '<div class="chat-content"><div class="chat-hint">Your Messages From Broadcast</div></div></div></li></ul>'
                        + '</div>'
                        + '<input placeholder="Your Message ..." id="chat-input" class="left" type="text" x-webkit-speech="" x-webkit-grammar="builtin:search" lang="en"/>'
                        + '<div class="clear"></div></div>')
 
-    chat_block.css({
-      'position': 'absolute'
-      , 'float': 'left'
-      , 'border': 'solid #D2D2D2 1px'
-      , 'box-shadow': 'rgba(0, 0, 0, 0.1) 0px 0px 7px 0px'
-      , 'background-color': 'whiteSmoke'
-      , 'color': 'black'
-      , 'width': 600 
-      , 'height': 400
-      , 'padding': 10
-      , 'font-size': 15
-    })
-
-
-    var css_p = {
-      main_height : 365
-      , widths: [100, 486]
-      , chat_input_h: 30
-      , box_shadow: 'rgba(0, 0, 0, 0.1) 0px 0px 7px 0px inset'
-      , border: 'solid #D2D2D2 1px'
-    }
-    $(chat_block).find(".divider").css({
-      'height': css_p.main_height
-      , 'margin': '0 5px'
-      , 'float': 'left'
-    })
-    $(chat_block).find("#chat-rooms-chooser").css({
-      'height': css_p.main_height 
-      , 'width': css_p.widths[0]
-      , 'border': css_p.border
-      , 'box-shadow': css_p.box_shadow
-      , 'margin-right': '10px'
-      , 'overflow-y': 'auto'
-      , 'background-color': '#EEEEEE'
-      , 'font-size': 13
-    })
-    $(chat_block).find("#chat-rooms").css({
-      'height': css_p.main_height - css_p.chat_input_h - 10
-      , 'width': css_p.widths[1]
-      , 'border': css_p.border
-      , 'box-shadow': css_p.box_shadow
-      , 'background-color': 'white'
-      , 'overflow': 'hidden'
-    })
-    $(chat_block).find("#chat-input").css({
-      'height': css_p.chat_input_h - 10
-      , 'width': css_p.widths[1] - 10 
-      , 'padding': 4 
-      , 'margin-top': '10px'
-      , 'font-size': 15
-    })
 
 
     //helper functions
@@ -383,8 +232,8 @@ function chat_view(options) {
       var chatroom = '<li id="chat-room-'+options.sid+'" data-name="'+options.sname+'"data-id="'+options.sid+'">'
                      + '<div class="chat-room"><div class="chat-content"><div class="chat-hint">Your Messages from '+options.sname+'</div></div></div></li>'
       var chatroomchooser = '<li class="chooser" id="chat-room-chooser-'+options.sid+'" data-name="'+options.sname+'"data-id="'+options.sid+'">'
-      + '<span class="name left" style="width: 75px; text-overflow:ellipsis; overflow: hidden;">' + options.sname + '</span>'
-              + '<span class="close right" data-id="'+options.sid+'" style="margin-right: 5px;color: #ccc;">&times;</span><div class="clear"></div></li>'
+      + '<span class="name left">' + options.sname + '</span>'
+              + '<span class="close right" data-id="'+options.sid+'">&times;</span><div class="clear"></div></li>'
       $(chatroom).appendTo("#chat-rooms ul")
       $(chatroomchooser).appendTo("#chat-rooms-chooser ul")
     }
@@ -541,9 +390,10 @@ function chat_view(options) {
               $(this).removeClass('active')
             }
           })
-          var submit = $('<li id="chat-new-submit"><div><input id="sname-new" type="text" placeholder="group name"/></div>'
-                        + '<div style="margin: 5px 0"><input id="create-session" type="submit" value="new group"/></div>'
-                        +'<div><input id="add-user" type="submit" value="add to this group"/></div></li>')
+          var submit = $('<li id="chat-new-submit">'
+                         + '<div><input id="sname-new" type="text" placeholder="group name"/></div>'
+                         + '<div id="create-session-container"><input id="create-session" type="submit" value="new group"/></div>'
+                         + '<div><input id="add-user" type="submit" value="add to this group"/></div></li>')
           $(ob).find('ul').append(submit)
           function get_selected() {
             var users = []
