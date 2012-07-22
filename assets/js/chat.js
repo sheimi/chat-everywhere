@@ -1,5 +1,6 @@
 !function($) {
-  var host = 'http://sheimi.vm:8000'
+  //var host = 'http://sheimi.vm:8000'
+  var host = 'http://localhost:8000'
   var default_urls = {
     update: host + '/m/update'
     , new_msg: host + '/m/new_msg'

@@ -7,32 +7,20 @@
 
 // Webkit
 @-webkit-keyframes progress-bar-stripes {
-  from  { background-position: 40px 0; }
-  to    { background-position: 0 0; }
+  from  { background-position: 0 0; }
+  to    { background-position: 40px 0; }
 }
 
 // Firefox
 @-moz-keyframes progress-bar-stripes {
-  from  { background-position: 40px 0; }
-  to    { background-position: 0 0; }
-}
-
-// IE9
-@-ms-keyframes progress-bar-stripes {
-  from  { background-position: 40px 0; }
-  to    { background-position: 0 0; }
-}
-
-// Opera
-@-o-keyframes progress-bar-stripes {
   from  { background-position: 0 0; }
   to    { background-position: 40px 0; }
 }
 
 // Spec
 @keyframes progress-bar-stripes {
-  from  { background-position: 40px 0; }
-  to    { background-position: 0 0; }
+  from  { background-position: 0 0; }
+  to    { background-position: 40px 0; }
 }
 
 
@@ -66,7 +54,7 @@
 
 // Striped bars
 .progress-striped .bar {
-  #gradient > .striped(#149bdf);
+  #gradient > .striped(#62c462);
   .background-size(40px 40px);
 }
 
@@ -74,8 +62,6 @@
 .progress.active .bar {
   -webkit-animation: progress-bar-stripes 2s linear infinite;
      -moz-animation: progress-bar-stripes 2s linear infinite;
-      -ms-animation: progress-bar-stripes 2s linear infinite;
-       -o-animation: progress-bar-stripes 2s linear infinite;
           animation: progress-bar-stripes 2s linear infinite;
 }
 
@@ -106,12 +92,4 @@
 }
 .progress-info.progress-striped .bar {
   #gradient > .striped(#5bc0de);
-}
-
-// Warning (orange)
-.progress-warning .bar {
-  #gradient > .vertical(lighten(@orange, 15%), @orange);
-}
-.progress-warning.progress-striped .bar {
-  #gradient > .striped(lighten(@orange, 15%));
 }

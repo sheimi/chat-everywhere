@@ -1,15 +1,7 @@
 !function($) {
 
-if (Array.prototype.remove == undefined) {
-  Array.prototype.remove = function(e) {
-    var t, _ref;
-    if ((t = this.indexOf(e)) > -1) {
-      return ([].splice.apply(this, [t, t - t + 1].concat(_ref = [])), _ref);
-    }
-  }
-}
-
 function chat_view(options) {
+
   //setup globals
   var global = {
     user: options.user
@@ -70,7 +62,7 @@ function chat_view(options) {
         })
       }
     }
-    global.chat = new $.chat(options)
+    global.chat = new sheimi.chat.Chat(options)
   }(jQuery, global)
 
   //set chatbar

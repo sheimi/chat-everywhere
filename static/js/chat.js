@@ -12847,157 +12847,332 @@ var isNumber = function(value) {
 };
 
 })(jQuery);
-!function($) {
-  var host = 'http://sheimi.vm:8000'
-  var default_urls = {
-    update: host + '/m/update'
-    , new_msg: host + '/m/new_msg'
-    , add_user: host + '/m/add_user'
-    , rm_user: host + '/m/rm_user'
-    , get_online: host + '/m/get_online'
-    , new_session: host + '/m/new_session'
-    , get_session_user: host + '/m/get_session_user'
-  }
- /*
-  * options = {
-  *   user: {
-  *     uid: int
-  *     uname: str
-  *   }
-  *   , on_msg: function when msg come
-  * }
-  *
-  */
-  function chat(options) {
+/* ===================================================
+ * sheimi.core.js 
+ * ===================================================
+ * Copyright 2012 sheimi.me.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ========================================================== */
 
-    var urls = default_urls
-    var user = options.user
+!function(window) {
+  
+/* --- fix of javascript object --- */
 
-    function update() {
-      $.ajax({
-        url: urls.update
-        , dataType: 'jsonp'
-        , data: {
-          args: JSON.stringify(user)
-        }
-      }).done(function() {
-        update()
-      }).done(options.on_msg)
-    }
-    /*
-    * args = {
-    *   sid: int
-    *   msg: str
-    * }
-    */
-    function new_msg(args) {
-      args.uid = user.uid
-      var callback = $.ajax({
-        url: urls.new_msg
-        , dataType: 'jsonp'
-        , data: {
-          args: JSON.stringify(args)
-        }
-      })
-      return callback
-    }
-
-    /*
-    * args = {
-    *   'sid': int
-    *   'uids': [int]
-    * }
-    */
-    function add_user(args) {
-      var callback = $.ajax({
-        url: urls.add_user
-        , dataType: 'jsonp'
-        , data: {
-          args: JSON.stringify(args)
-        }
-      })
-      return callback
-    }
-
-    function rm_user(sid) {
-      var args = {
-        uid : user.uid
-        , sid : sid
+/* --- fix Array -- Author: xxx --- */
+!function(Array) {
+  if (Array.prototype.remove == undefined) {
+    Array.prototype.remove = function(e) {
+      var t, _ref;
+      if ((t = this.indexOf(e)) > -1) {
+        return ([].splice.apply(this, [t, t - t + 1].concat(_ref = [])), _ref);
       }
-      var callback = $.ajax({
-        url: urls.rm_user
-        , dataType: 'jsonp'
-        , data: {
-          args: JSON.stringify(args)
-        }
-      })
-      return callback
-    }
-    /*
-    * sraw = {
-    *   sname: str (optional) 
-    *   uids: [int] (uids) 
-    * }
-    */
-    function new_session(sraw) {
-      sraw.oid = user.uid
-      var callback = $.ajax({
-        url: urls.new_session
-        , dataType: 'jsonp'
-        , data: {
-          args: JSON.stringify(sraw)
-        }
-      })
-      return callback
-    }
-
-    function get_online() {
-      var callback = $.ajax({
-        url: urls.get_online
-        , dataType: 'jsonp'
-      })
-      return callback
-    }
-
-    function get_session_user(sid) {
-      var args = {sid: sid}
-      var callback = $.ajax({
-        url: urls.get_session_user
-        , dataType: 'jsonp'
-        , data: {
-          args: JSON.stringify(args)
-        }
-      })
-      return callback
-    }
-
-    //make function public
-    this.new_msg = new_msg
-    this.add_user = add_user
-    this.rm_user = rm_user
-    this.new_session = new_session
-    this.get_online = get_online
-    this.get_session_user = get_session_user
-
-    //run update
-    update()
-  }
-
-  $.chat = chat
-
-}(jQuery)
-!function($) {
-
-if (Array.prototype.remove == undefined) {
-  Array.prototype.remove = function(e) {
-    var t, _ref;
-    if ((t = this.indexOf(e)) > -1) {
-      return ([].splice.apply(this, [t, t - t + 1].concat(_ref = [])), _ref);
     }
   }
+}(Array)
+
+
+/* --- set up sheimi namespace --- */
+
+function Sheimi(dict) {
+
+  var sheimi = this
+
+  /* --- function starts --- */
+  function extend(dict) {
+     _.extend(sheimi, dict)
+  }
+
+  for (var key in dict) {
+    sheimi[key] = dict[key]
+  }
+
+  /* --- set methods --- */
+  this.extend = extend
+
 }
 
+window.Sheimi = Sheimi
+window.sheimi = new Sheimi()
+
+}(window)
+/* ===================================================
+ * sheimi.util.js 
+ * ===================================================
+ * Copyright 2012 sheimi.me.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ========================================================== */
+
+!function(sheimi) {
+
+/* --- to update config --- */
+function updateConfig(old, updated) {
+  _.extend(old, updated)
+  return old
+}
+
+/* --- to validate email --- */
+function validateEmail(email) {
+  var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  return re.test(email)
+}
+
+var util = new Sheimi({
+  updateConfig: updateConfig   
+  , validateEmail: validateEmail
+})
+  
+sheimi.extend({
+  util: util
+})
+
+}(sheimi)
+/* ===================================================
+ * sheimi.jquery.js 
+ * ===================================================
+ * Copyright 2012 sheimi.me.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ========================================================== */
+
+if (jQuery != undefined && sheimi != undefined) {
+!function(sheimi, jQuery) {
+
+$.fn.email = function validateEmail() { 
+  return sheimi.validateEmail($(this).val())
+}   
+
+}(sheimi, jQuery)
+}
+/* ===================================================
+ * sheimi.chat.js 
+ * ===================================================
+ * dependency:
+ *  sheimi.core.js
+ *  sheimi.util.js
+ *  jquery
+ * ===================================================
+ * Copyright 2012 sheimi.me.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ========================================================== */
+
+//function(sheimi, $) {
+
+
+
+
+/* -------
+ * chat js client
+ * -------
+ * options = {
+ *   user: {
+ *     uid: int
+ *     , uname: str
+ *   }
+ *   , on_msg: function when msg come
+ * }
+ * ------- */
+function Chat(option) {
+
+  var defaultOption = {
+    host: 'http://localhost:8000'
+    , dataType: 'jsonp'
+  }
+
+  var config = sheimi.util.updateConfig(defaultOption, option)
+  var user = config.user
+  
+  urls = {
+    update: config.host + '/m/update'
+    , new_msg: config.host + '/m/new_msg'
+    , add_user: config.host + '/m/add_user'
+    , rm_user: config.host + '/m/rm_user'
+    , get_online: config.host + '/m/get_online'
+    , new_session: config.host + '/m/new_session'
+    , get_session_user: config.host + '/m/get_session_user'
+  }
+
+  /* --- holding the long connection --- */
+  function update() {
+    $.ajax({
+      url: urls.update
+      , dataType: config.dataType
+      , data: {
+        args: JSON.stringify(user)
+      }
+    }).done(function() {
+      update()
+    }).done(option.on_msg)
+  }
+
+  /* -------
+   * to send a message
+   * -------
+   * args = {
+   *  sig: int
+   *  , msg: str
+   * }
+   * ------- */
+  function new_msg(args) {
+    args.uid = user.uid
+    var callback = $.ajax({
+      url: urls.new_msg
+      , dataType: config.dataType
+      , data: {
+        args: JSON.stringify(args)
+      }
+    })
+    return callback
+  }
+
+  /* -------
+   * to add user to a session
+   * -------
+   * args = {
+   *  sig: int
+   *  , uids: [int]
+   * }
+   * ------- */
+  function add_user(args) {
+    var callback = $.ajax({
+      url: urls.add_user
+      , dataType: config.dataType
+      , data: {
+        args: JSON.stringify(args)
+      }
+    })
+    return callback
+  }
+
+  /* -------
+   * to remove a user from a session
+   * -------
+   * sid
+   * ------- */
+  function rm_user(sid) {
+    var args = {
+      uid : user.uid
+      , sid : sid
+    }
+    var callback = $.ajax({
+      url: urls.rm_user
+      , dataType: config.dataType
+      , data: {
+        args: JSON.stringify(args)
+      }
+    })
+    return callback
+  }
+
+  /* -------
+   * to add a new session
+   * -------
+   * sraw = {
+   *  sname: str (optional)
+   *  , uids: [int] (uids)
+   * }
+   * ------- */
+  function new_session(sraw) {
+    sraw.oid = user.uid
+    var callback = $.ajax({
+      url: urls.new_session
+      , dataType: config.dataType
+      , data: {
+        args: JSON.stringify(sraw)
+      }
+    })
+    return callback
+  }
+
+  /* -------
+   * to get on line users
+   * ------- */
+  function get_online() {
+    var callback = $.ajax({
+      url: urls.get_online
+      , dataType: config.dataType
+    })
+    return callback
+  }
+
+  /* -------
+   * get users from a session
+   * ------- */
+  function get_session_user(sid) {
+    var args = {sid: sid}
+    var callback = $.ajax({
+      url: urls.get_session_user
+      , dataType: config.dataType
+      , data: {
+        args: JSON.stringify(args)
+      }
+    })
+    return callback
+  }
+
+  /* --- the interface --- */
+  this.new_msg = new_msg
+  this.add_user = add_user
+  this.rm_user = rm_user
+  this.new_session = new_session
+  this.get_online = get_online
+  this.get_session_user = get_session_user
+
+  /* --- update ---*/
+  update()
+}
+
+sheimi.chat = new Sheimi({
+  Chat: Chat
+})
+
+//}(sheimi, jQuery)
+!function($) {
+
 function chat_view(options) {
+
   //setup globals
   var global = {
     user: options.user
@@ -13058,7 +13233,7 @@ function chat_view(options) {
         })
       }
     }
-    global.chat = new $.chat(options)
+    global.chat = new sheimi.chat.Chat(options)
   }(jQuery, global)
 
   //set chatbar
