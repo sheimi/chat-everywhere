@@ -12998,7 +12998,7 @@ $.fn.email = function validateEmail() {
  * limitations under the License.
  * ========================================================== */
 
-//function(sheimi, $) {
+function(sheimi, $) {
 
 
 
@@ -13168,17 +13168,18 @@ sheimi.chat = new Sheimi({
   Chat: Chat
 })
 
-//}(sheimi, jQuery)
-!function($) {
+}(sheimi, jQuery)
+!function(sheimi, $) {
 
-function chat_view(options) {
+function ChatView(options) {
+
+  var defaultConfig = {
+    render_to: 'body'
+    , bar_position: 'fixed'
+  }
 
   //setup globals
-  var global = {
-    user: options.user
-    , render_to: options.render_to || 'body'
-    , bar_position: options.bar_position || 'fixed'
-  }
+  var global = sheimi.util.updateConfig(defaultConfig, options)
 
   //set on_msg 
   !function($, global) {
@@ -13673,7 +13674,9 @@ function chat_view(options) {
   }
 }
 
-$.chat_view = chat_view
+sheimi.chat.extend({
+  ChatView = ChatView
+})
 
-}(jQuery)
+}(sheimi, jQuery)
 

@@ -14,5 +14,5 @@ js:
 	cat assets/js/sheimi/sheimi.core.js >> static/js/chat.js
 	cat assets/js/sheimi/sheimi.util.js >> static/js/chat.js
 	cat assets/js/sheimi/sheimi.jquery.js >> static/js/chat.js
-	cat assets/js/sheimi/sheimi.chat.js >> static/js/chat.js
+	cat assets/js/sheimi/chat/sheimi.chat.js >> static/js/chat.js
 	cat assets/js/chat-view.js >> static/js/chat.js

@@ -21,7 +21,7 @@
  * limitations under the License.
  * ========================================================== */
 
-//function(sheimi, $) {
+function(sheimi, $) {
 
 
 
@@ -191,4 +191,4 @@ sheimi.chat = new Sheimi({
   Chat: Chat
 })
 
-//}(sheimi, jQuery)
+}(sheimi, jQuery)

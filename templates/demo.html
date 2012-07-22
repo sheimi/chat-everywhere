@@ -9,7 +9,7 @@
 $(document).ready(function() {
   var rand = parseInt(Math.random() * 10)
   console.log(rand)
-  var chatview = new $.chat_view({user:{uname: 'sheimi', uid: rand}})
+  var chatview = new sheimi.chat.ChatView({user:{uname: 'sheimi', uid: rand}})
   chatview.show()
 })
 </script>
