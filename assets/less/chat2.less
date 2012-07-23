@@ -17,7 +17,7 @@
     margin: 0;
     position: absolute;
     top: 0;
-    bottom: 40px;
+    bottom: 50px;
     right: 0;
     left: 0;
   }
@@ -30,6 +30,7 @@
     bottom: 0;
     right: 0;
     left: 0;
+    overflow-x: scroll;
 
     div.chat-content {
       div.msg-block {
@@ -83,14 +84,40 @@
     }
   }
   .chat-input {
+    @box-shadow: 5px -1px 10px rgba(0, 0, 0, 0.5);
+    .box-shadow(@box-shadow);
     position: absolute;
-    bottom: 10px;
-    height: 25px;
-    padding: 5px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    padding: 10px 5px;
     input {
       height: 20px;
-      width: 476px;
+      width: 434px;
       background: rgba(255, 255, 255, 0.5);
     }
+  }
+}
+
+#chatrooms-toggle {
+  @toggle-size: 25px;
+  background: rgba(0, 0, 0, 0.1);
+  color: rgba(44, 44, 44, 0.5);
+  width: @toggle-size - 7;
+  height: @toggle-size - 7;
+  font-size: @toggle-size;
+  padding: 6px; 
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  cursor: pointer;
+  @radius: 5px;
+  .border-radius(@radius);
+  @transition: all 0.2s linear;
+  .transition(@transition);
+  &:hover {
+    background: rgba(44, 44, 44, 0.3);
+    color: rgba(22, 22, 22, 0.5);
   }
 }

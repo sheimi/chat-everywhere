@@ -1,4 +1,8 @@
-all: js less
+all: js less other
+
+other:
+	cp -r assets/img static/img
+	cp -r assets/font static/font
 
 less:
 	lessc --compress assets/less/chat.less > static/css/chat.css

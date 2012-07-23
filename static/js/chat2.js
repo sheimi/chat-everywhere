@@ -13382,12 +13382,33 @@ var chatroom_frame = '<div id="chatrooms"><ul class="clearfix">'
                    + ' x-webkit-speech="" x-webkit-grammar="builtin:search" lang="en">'
                    + '</div></div>'
 
-$(chatroom_frame).appendTo('body').css({
-  'right': -500
-}).animate({
-  'right': '+=500'
-}, {
-  easing: 'easeInOutExpo'
+$(chatroom_frame).appendTo('body').css({'right': -500})
+var roomShowed = false
+function toggleChatRoom() {
+  roomShowed = !roomShowed
+  var change = roomShowed ? '+=500' : '-=500'
+  $('#chatrooms').animate({
+    'right': change
+  }, {
+    easing: 'easeInOutExpo'
+  })
+}
+var chatrooms_toggle = '<div id="chatrooms-toggle"><i class="icon-off icon-white"></i></div>'
+$(chatrooms_toggle).appendTo('body').click(function() {
+  toggleChatRoom()
+})
+
+$('#chat-input').keydown(function(e) {
+  if (e.keyCode != 13)
+    return
+  var msg = $(this).val()
+  var block = new MsgBlock({
+    type: 'msg'
+    , msg: msg
+    , user: 'I'
+  })
+  block.show()
+  $(this).val('')
 })
 
 /* ---- 
