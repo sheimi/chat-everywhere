@@ -13373,514 +13373,74 @@ sheimi.chat = new Sheimi({
 })
 
 }(sheimi, jQuery)
-!function(sheimi, $) {
+//!function(sheimi, $) {
 
-function ChatView(options) {
+var chatroom_frame = '<div id="chatrooms"><ul class="clearfix">'
+                   + '<li class="chatroom"><div class="chat-content"></div></li>'
+                   + '</ul><div class="chat-input">'
+                   + '<input placeholder="Your Message ..." id="chat-input" type="text"'
+                   + ' x-webkit-speech="" x-webkit-grammar="builtin:search" lang="en">'
+                   + '</div></div>'
 
-  var defaultConfig = {
-    render_to: 'body'
-    , bar_position: 'fixed'
-  }
-
-  //setup globals
-  var global = sheimi.util.updateConfig(defaultConfig, options)
-
-  //set on_msg 
-  !function($, global) {
-    function msg_handler(msg, build_msg) {
-
-      var chatroom = global.chat_block.croom(msg.sid)
-      console.log(chatroom)
-      var final_msg = '<div>' + build_msg(msg) + '</div>'
-      $(final_msg).hide()
-            .appendTo(chatroom.find(".chat-content"))
-            .slideDown(function() {
-              var height = $(chatroom).find('.chat-content').height() - $(chatroom).find(".chat-room").height()
-              console.log(height)
-              $(chatroom).find(".chat-room").animate({scrollTop: height});
-            })
-    }
-
-    options.on_msg = function(msg) {
-      msg = msg.msg
-      console.log(msg)
-      if (msg.cmd == 'new_msg') {
-        msg_handler(msg, function(msg) {
-          var mdiv = '<div class="msg">' + msg.user.uname+' : '+msg.msg + '</div>'
-          return mdiv
-        })
-      } else if (msg.cmd == 'new_session') {
-        global.chat_block.make_chatroom({
-          sid: msg.session.sid
-          , sname: msg.session.sname || "Untitled"
-        })
-      } else if (msg.cmd == 'rm_user') {
-        msg_handler(msg, function(msg) {
-          var mdiv = '<div class="info">'+msg.user.uname+' Quit</div>'
-          return mdiv
-        })
-      } else if (msg.cmd == 'added') {
-        global.chat_block.make_chatroom({
-          sid: msg.session.sid
-          , sname: msg.session.sname || "Untitled"
-        })
-      } else if (msg.cmd == 'add_user') {
-        msg_handler(msg, function(msg) {
-          var mdiv = '<div class="info">User '
-          for (var ui in msg.users) {
-            var user = msg.users[ui]
-            if (user.uname == undefined)
-              continue
-            mdiv += user.uname + ', '
-          }
-          mdiv += "Added To This Group</div>"
-          return mdiv
-        })
-      }
-    }
-    global.chat = new sheimi.chat.Chat(options)
-  }(jQuery, global)
-
-  //set chatbar
-  !function($, global) {
-
-    var chat_bar = $('<div id="chat-bar">'
-                     + ' <div id="chat-bar-inner">'
-                     + '<div class="divider"></div>'
-                     + '<div id="user-block" class="inner"><a>' + options.user.uname + '</a></div><div class="divider"></div>' 
-                     + '<div id="other-users" class="inner" >Online Users</div><div class="divider"></div>' 
-                     + '<div id="chat-min" class="inner">Chat Block</div>'
-                     + '<div class="clear"></div></div></div>')
-
-
-    global.chat_bar = {
-      append: function() {
-        $(chat_bar).appendTo(global.render_to)
-
-        //set chat event
-        $("#chat-bar").hover(function() {
-          $(this).animate({opacity: 1})
-        }, function() {
-          $(this).animate({opacity: 0.7})
-        })
-
-        //set online block
-        var is_click = false
-        var ob = new global.online_block({
-          online_func: global.chat.get_online
-          , css: {
-            'border-bottom-width': 0 
-            , 'width': $("#chat-bar #other-users").width() + 10
-            , 'font-size': 15
-            , 'max-height': 200
-            , 'position': global.bar_position 
-          }
-        })
-        $("#other-users").click(function() {
-          is_click = !is_click
-          if (is_click) {
-            ob.show({
-              css: {
-                'top': $("#chat-bar").position().top - $("#chat-bar").height() 
-                , 'left': $("#chat-bar #other-users").position().left - 1
-              }
-              , failed: function() {
-                is_click = false
-              }
-            })
-          } else {
-            ob.hide()
-          }
-        })
-
-        $('#chat-min').click(function() {
-          global.chat_block.trigger()
-        })
-      } 
-
-    }
-  }(jQuery, global)
-  //chat bar end
-  
-  //online block
-  !function($, global) {
-    
-    function online_block(options) {
-      options.append_to = options.append_to || global.render_to 
-      var ob = $('<div id="online-block"></div>')
-
-      if (options.css != undefined)
-        ob.css(options.css)
-      function build_userli(user) {
-        var li = '<li class="o-user" data-id="' + user.uid + '">'+user.uname+'</li>'
-        return li
-      }
-
-      this.hide = function() {
-        ob.fadeOut(100, function() {$(this).remove()})
-      }
-
-      this.show = function(op) {
-        var op = op || {}
-        if (op.css != undefined) {
-          ob.css(op.css)
-        }
-        options.online_func(op.sid).done(function(msg) {
-          var users = msg.users
-          if (users.length <= 1) {
-            if (op.failed) {
-              op.failed()
-            }
-            return
-          }
-          var lis = '<ul id="o-ulist">';
-          for (var ui in users) {
-            if (users[ui].uid != global.user.uid && users[ui].uname != undefined)
-              lis += build_userli(users[ui])
-          }
-          lis += '</ul>'
-          ob.html("").hide().append(lis).appendTo(options.append_to).fadeIn(100)
-          if (options.callback != undefined)
-            options.callback(ob)
-        })
-      }
-    }
-
-    global.online_block = online_block
-
-  }(jQuery, global)
-  //online_block end
-
-
-  //chat block
-  !function($, global) {
-
-    var cb_global = {
-      is_show: false
-      , is_append: false
-      , active_sid: 0
-      , sids: [0]
-    }
-
-    var chat_block = $('<div id="chat-block">'
-                       + '<div class="close">&times;</div>'
-                       + '<div id="chat-tool-bar">'
-                       +   '<span id="chat-session-name">Broadcast</span>'
-                       +   '<div id="chat-tools" class="right">'
-                       +     '<span id="session-users">Group Users</span>'
-                       +     '<span id="new-session">New</span>'
-                       +   '</div><div class="clear"></div>'
-                       + '</div>'
-                       + '<hr>' 
-                       + '<div id="chat-rooms-chooser" class="left">'
-                       +   '<ul><li data-id="0" data-name="Broadcast" class="active chooser" id="chat-room-chooser-0">Broadcast</li></ul>'
-                       + '</div>'
-                       + '<div id="chat-rooms" class="left">'
-                       +   '<ul><li data-id="0" data-name="Broadcast" id="chat-room-0"><div class="chat-room">'
-                       +   '<div class="chat-content"><div class="chat-hint">Your Messages From Broadcast</div></div></div></li></ul>'
-                       + '</div>'
-                       + '<input placeholder="Your Message ..." id="chat-input" class="left" type="text" x-webkit-speech="" x-webkit-grammar="builtin:search" lang="en"/>'
-                       + '<div class="clear"></div></div>')
-
-
-
-    //helper functions
-    /*
-    * options = {
-    *   sid: chatroom id
-    *   sname: chatroom name optional
-    * }
-    */
-    function make_chatroom(options) {
-      if (cb_global.sids.indexOf(options.sid) != -1)
-        return
-      cb_global.sids.push(options.sid)
-      if (options.sname == undefined)
-        options.sname = "Untitled"
-      var chatroom = '<li id="chat-room-'+options.sid+'" data-name="'+options.sname+'"data-id="'+options.sid+'">'
-                     + '<div class="chat-room"><div class="chat-content"><div class="chat-hint">Your Messages from '+options.sname+'</div></div></div></li>'
-      var chatroomchooser = '<li class="chooser" id="chat-room-chooser-'+options.sid+'" data-name="'+options.sname+'"data-id="'+options.sid+'">'
-      + '<span class="name left">' + options.sname + '</span>'
-              + '<span class="close right" data-id="'+options.sid+'">&times;</span><div class="clear"></div></li>'
-      $(chatroom).appendTo("#chat-rooms ul")
-      $(chatroomchooser).appendTo("#chat-rooms-chooser ul")
-    }
-
-    function moveto_chatroom(sid) {
-
-      var chatroom = croom(sid)
-      var ul_top = $("#chat-rooms ul").position().top
-      var c_top = $(chatroom).position().top
-      var delta = "-=" + (c_top - ul_top)
-      $("#chat-rooms ul").animate({'margin-top': delta})
-
-      var chooser = croomc(sid)
-      $(".chooser").each(function() {$(this).removeClass("active")})
-      chooser.addClass("active")
-
-      var sname = $(chatroom).attr("data-name")
-      $("#chat-session-name").fadeOut(function() {
-        $(this).text(sname)
-        $(this).fadeIn()
-      })
-      cb_global.active_sid = sid
-    }
-    function croom(sid) {
-      return $("#chat-room-"+sid)
-    }
-    function croomc(sid) {
-      return $("#chat-room-chooser-"+sid)
-    }
-
-    function active_session_users(active) {
-      obj = $("#session-users")
-      if (active) {
-        if (!obj.hasClass("active")) {
-          obj.addClass("active")
-          session_ob.show({
-            css: {
-              'top': $("#session-users").position().top + $("#new-session").height() + 10
-              , 'left': $("#session-users").position().left 
-            }
-            , sid: cb_global.active_sid
-          })
-        }
-      } else {
-        if (obj.hasClass("active")) {
-          obj.removeClass("active")
-          session_ob.hide()
-        }
-      }
-    }
-
-    function active_new_session(active) {
-      obj = $("#new-session")
-      if (active) {
-        if (!obj.hasClass("active")) {
-          obj.addClass("active")
-          all_ob.show({
-            css: {
-              'top': $("#new-session").position().top + $("#new-session").height() + 10
-              , 'left': $("#new-session").position().left 
-            }
-          })
-        }
-      } else {
-        if (obj.hasClass("active")) {
-          obj.removeClass("active")
-          all_ob.hide()
-        }
-      }
-    }
-
-    function show_chat_block(show) {
-      if (show) {
-
-        var wh = $(global.render_to).height() - 28
-        var ww = $(global.render_to).width()
-        var cbh = $("#chat-block").height()
-        var cbw = $("#chat-block").width()
-        if (global.bar_position != 'fixed') {
-          $("#chat-block").css({
-            'margin-left': (ww - cbw) / 2
-            , 'margin-top': (wh - cbh) / 2 
-          })
-        } else {
-          var wh = $(window).height() - 28
-          var ww = $(window).width()
-          $("#chat-block").css({
-            'left': (ww - cbw) / 2
-            , 'top': (wh - cbh) / 2 
-          })
-        }
-
-        $("#chat-block").fadeIn(200)
-      } else {
-        $("#chat-block").fadeOut(200)
-      }
-      cb_global.is_show = show 
-    }
-
-
-    //set live
-    var chooser_close = false
-    $(".chooser").live("click", function() {
-      var sid = parseInt($(this).attr("data-id"))
-      if (sid != cb_global.active_sid && !chooser_close) {
-        moveto_chatroom(sid)
-      }
-      chooser_close = false 
-    })
-    $(".chooser span.close").live('click', function() {
-      chooser_close = true
-      var sid = parseInt($(this).attr("data-id"))
-      clicked = $(this)
-      global.chat.rm_user(sid).done(function() {
-        //TODO remove the sid in the list
-        $(clicked).parent().fadeOut(function() {
-          $(this).remove()
-          croom(sid).remove()
-          cb_global.sids.remove(sid)
-        })
-      })
-      if (parseInt(sid) == cb_global.active_sid) {
-        moveto_chatroom(0)
-      }
-    })
-
-
-    function setup_events() {
-      //close btn
-      $("#chat-block .close").click(function() {
-        show_chat_block(false)
-      })
-
-      //all_online btn obj
-      all_ob = new global.online_block({
-        online_func: global.chat.get_online
-        , append_to: '#chat-block'
-        , css: {
-          'width': 160 
-          , 'max-height': 200
-        }
-        , callback: function(ob) {
-          var lis = $(ob).find('li')
-          var lis_f = {}
-          $(lis).each(function() {
-            var id = $(this).attr('data-id')
-            lis_f[id] = false
-          }).click(function() {
-            var id = $(this).attr('data-id')
-            lis_f[id] = !lis_f[id]
-            if (lis_f[id]) {
-              $(this).addClass('active')
-            } else {
-              $(this).removeClass('active')
-            }
-          })
-          var submit = $('<li id="chat-new-submit">'
-                         + '<div><input id="sname-new" type="text" placeholder="group name"/></div>'
-                         + '<div id="create-session-container"><input id="create-session" type="submit" value="new group"/></div>'
-                         + '<div><input id="add-user" type="submit" value="add to this group"/></div></li>')
-          $(ob).find('ul').append(submit)
-          function get_selected() {
-            var users = []
-            var unames = []
-            $(lis).each(function() {
-              if($(this).hasClass('active')) {
-                users.push(parseInt($(this).attr('data-id')))
-                var text = $(this).text()
-                unames.push(text)
-              }
-            })
-            return {
-              users: users
-              , unames: unames
-            }
-          }
-
-          $("#add-user").click(function(e) {
-            e.preventDefault()
-            selected = get_selected()
-            console.log(selected.users)
-            if (selected.users.length == 0)
-              return
-            global.chat.add_user({
-              sid: cb_global.active_sid
-              , uids: selected.users
-            }).done(function() {
-              active_new_session(false)
-            })
-          })
-
-          $("#create-session").click(function(e) {
-            e.preventDefault()
-            var sname_b = "chat with"
-            selected = get_selected()
-            if (selected.users.length == 0)
-              return
-            for (var i in selected.unames) {
-              if (typeof selected.unames[i] === "string")
-                sname_b += " " + selected.unames[i]
-            }
-            var sname = $("#sname-new").val() || sname_b 
-            selected.users.push(global.user.uid)
-            global.chat.new_session({
-              uids: selected.users
-              , sname: sname
-            }).done(function() {
-              active_new_session(false)
-            })
-          })
-        }
-      })
-      $("#new-session").click(function() {
-        if ($(this).hasClass('active')) {
-          active_new_session(false)
-        } else {
-          active_session_users(false)
-          active_new_session(true)
-        }
-      })
-
-      //session online
-      session_ob = new global.online_block({
-        online_func: global.chat.get_session_user
-        , append_to: '#chat-block'
-        , css: {
-          'width': 140 
-          , 'max-height': 200
-        }
-      })
-      $("#session-users").click(function() {
-        if ($(this).hasClass('active')) {
-          active_session_users(false)
-        } else {
-          active_session_users(true)
-          active_new_session(false)
-        }
-      })
-
-
-      $('#chat-input').keydown(function(e){
-        if (e.keyCode != 13)
-          return
-        global.chat.new_msg({
-          sid: cb_global.active_sid
-          , msg: $("#chat-input").val()
-        }).done(function() {
-          $("#chat-input").val("")
-        })
-      })
-
-
-    }
-
-    global.chat_block = {
-      trigger: function() {
-        show_chat_block(!cb_global.is_show) 
-      } 
-      , append: function() {
-        $(chat_block).hide().appendTo(global.render_to).draggable()
-        setup_events()
-      }
-      , make_chatroom: make_chatroom
-      , croom: croom
-    } 
-
-  }(jQuery, global)
-  //add
-
-
-  this.show = function() {
-    global.chat_bar.append()
-    global.chat_block.append()
-  }
-}
-
-sheimi.chat.extend({
-  ChatView: ChatView
+$(chatroom_frame).appendTo('body').css({
+  'right': -500
+}).animate({
+  'right': '+=500'
+}, {
+  easing: 'easeInOutExpo'
 })
 
-}(sheimi, jQuery)
+/* ---- 
+ * msg block
+ * ----
+ * options = {
+ *   type: str
+ *   , msg: str
+ *   , user: str(option)
+ * }
+ * ---- */
+function MsgBlock(options) {
+  var block = '<div class="msg-block"></div>'
+  if (options.type == 'msg') {
+    block = $(block).addClass('clearfix')
+    var user_div = $('<div></div>')
+    var chat_inner = $('<div class="chat-inner"></div>')
+    if (options.user == 'I') {
+      user_div.addClass("chat-me")
+      chat_inner.append('<span class="username">I</span>')
+    } else {
+      chat_inner.append('<span class="username">'+options.user+'</span>')
+      user_div.addClass("chat-user")
+    }
+    user_div.append(chat_inner)
+    block.append(user_div)
+  } else {
+    block = $(block).addClass(options.type)
+  }
 
+  var text = '<div class="chat-msg">' + options.msg + '</div>'
+  block.append(text)
+  
+  /* --- show the block --- */
+  function show() {
+    var right = 500
+    block.appendTo(".chatroom .chat-content").css({
+      'position': 'fixed'
+      , 'right': -right
+    }).animate({
+      'right': '+=' + right
+    }, {
+      easing: 'easeInOutExpo'
+      , complete: function() {
+        block.css({
+          'position': 'static'
+        })
+      }
+    })
+  }
+
+  /* --- interfaces --- */
+  this.show = show
+}
+
+//}(jQuery)

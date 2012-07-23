@@ -504,7 +504,7 @@ function ChatView(options) {
 }
 
 sheimi.chat.extend({
-  ChatView = ChatView
+  ChatView: ChatView
 })
 
 }(sheimi, jQuery)

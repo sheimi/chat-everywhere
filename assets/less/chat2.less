@@ -1,0 +1,96 @@
+@import 'lib/bootstrap.less';
+
+#chatrooms {
+  @chatroom-width: 500px;
+  position: fixed;
+  width: @chatroom-width;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: @grayLighter;
+
+  @box-shadow: inset 3px 0px 10px rgba(0, 0, 0, 0.5), 1px 0px rgba(0, 0, 0, 0.5);
+  .box-shadow(@box-shadow);
+
+  ul {
+    list-style: none;
+    margin: 0;
+    position: absolute;
+    top: 0;
+    bottom: 40px;
+    right: 0;
+    left: 0;
+  }
+
+  .chatroom {
+    width: @chatroom-width - 14px;
+    padding: 5px 7px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+
+    div.chat-content {
+      div.msg-block {
+        @box-shadow: 0 2px 5px rgba(200, 200, 200, 0.5);
+        .box-shadow(@box-shadow);
+        color: #555; 
+        background-color: #FBFBFB; 
+        border-bottom: 1px solid #D2D2D2;
+        border-top: 1px solid @white;
+        &.hint {
+          padding: 10px;
+          color: #C09853;
+          background-color: #FCF8E3;
+          border-bottom: 1px solid #FBEED5;
+        }
+        &.info {
+          padding: 10px;
+          color: #3A87AD;
+          background-color: #D9EDF7; 
+          border-bottom: 1px solid #BCE8F1;
+        }
+        .chat-user, .chat-me {
+          position: relative;
+          top: 0;
+          bottom: 1px;
+          background-color: #F5F5F5;
+          border-bottom: 1px solid #DDD;
+          width: 60px;
+          padding: 10px;
+        }
+        .chat-user {
+          float: left;
+          border-right: 1px solid #DDD;
+        }
+        .chat-me {
+          float: right;
+          border-left: 1px solid #DDD;
+        }
+        .chat-inner {
+          overflow: hidden;
+        }
+        .username {
+          margin-right: 5px;
+        }
+        .chat-msg {
+          width: @chatroom-width - 115px; 
+          padding: 10px;
+          float: left;
+        }
+      }
+    }
+  }
+  .chat-input {
+    position: absolute;
+    bottom: 10px;
+    height: 25px;
+    padding: 5px;
+    input {
+      height: 20px;
+      width: 476px;
+      background: rgba(255, 255, 255, 0.5);
+    }
+  }
+}
